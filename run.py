@@ -9,6 +9,9 @@ import numpy as np
 import os
 import cv2
 import pyzbar.pyzbar as pyzbar
+# remember to download the following two packages
+import requests
+import json
 
 # define multiprocess information queue
 # queue for distance to motor
@@ -63,6 +66,9 @@ mag = GY271M(device)
 
 m1 = Motor(pwm0, pwm1, in1, in2, in3, in4)
 
+# Define IP address
+ip_addr = '192.168.3.2'
+
 
 def Get_Task():
     '''
@@ -71,7 +77,16 @@ def Get_Task():
     不接受参数
     '''
     # TODO Acquiring Tasks
-    pass
+    while(True):
+        try:
+            task_url = 'http://' + ip_addr + '/task_api/get_task'
+            task_reqres = requests.get(task_url)
+            if task_reqres.status_code == 200:
+                task = json.loads(task_reqres.text)
+                if task['status'] == True:
+                    return task['task_id'], task['dest']
+        except Exception as e:
+            pass
 
 
 def Finish_Task():
